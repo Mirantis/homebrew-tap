@@ -3,7 +3,7 @@ require "yaml"
 class Mkectl < Formula
   desc "Tool for creating and managing MKE 4.x kubernetes clusters"
   homepage "https://mirantis.github.io/mke-docs/"
-  VERSION = "v4.0.1-rc.3"
+  VERSION = "v4.0.0"
 
   version VERSION
 
