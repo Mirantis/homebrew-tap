@@ -9,16 +9,16 @@ class Mkectl < Formula
 
   if OS.mac? && Hardware::CPU.intel?
     url "https://github.com/MirantisContainers/mke-release/releases/download/#{VERSION}/mkectl_darwin_x86_64.tar.gz"
-    sha256 "54df9ee126f5c6e7bcf4d7bb8d98cf7fd2db11daa123d0c8e744997cecaa2959"
+    sha256 "67e8d2d14a5b1ad0e1053a0dc39a779d4e5c583792830818afb0d28e696b26c8"
   elsif OS.mac? && Hardware::CPU.arm?
     url "https://github.com/MirantisContainers/mke-release/releases/download/#{VERSION}/mkectl_darwin_arm64.tar.gz"
-    sha256 "c31a6906d9da6dfaa02873c22bcc05a759a41a7902e3e734883121bd39faae49"
+    sha256 "f29bae9d60124e7a197c360f5af36e2186d1539d0c47bdb9f86f03cc4674ccda"
   elsif OS.linux? && Hardware::CPU.intel?
     url "https://github.com/MirantisContainers/mke-release/releases/download/#{VERSION}/mkectl_linux_x86_64.tar.gz"
-    sha256 "8261544f42ab813d5ad7d3a0902be4e68dad9177411d0e7f28c6ad0277e699ba"
+    sha256 "b967161377040c0906034ba09771b74e9283d6d41d56da46b89ad1d264fa6999"
   elsif OS.linux? && Hardware::CPU.arm?
     url "https://github.com/MirantisContainers/mke-release/releases/download/#{VERSION}/mkectl_linux_arm64.zip"
-    sha256 "6bf8927bf3e6e4c8e9435eaceec202651fdd7516d5dcab4ea67248f5f18e7a3e"
+    sha256 "b3a6ffa1344232cd77fdd37d0a0e5084991810eeb14ef515f5f87b4d2c68700e"
   else
     odie "Unsupported platform"
   end
