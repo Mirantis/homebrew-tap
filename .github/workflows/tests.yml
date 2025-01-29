@@ -24,13 +24,33 @@ jobs:
           key: ${{ matrix.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
           restore-keys: ${{ matrix.os }}-rubygems-
 
-      - run: brew test-bot --only-cleanup-before
+      - run: |
+           brew test-bot --only-cleanup-before | tee brew_test_log.txt
+           if grep -q "Warning: 1 failed step ignored!" brew_test_log.txt; then
+             echo "Test failed. Exiting with failure."
+             exit 1
+           fi
 
-      - run: brew test-bot --only-setup
+      - run: |
+           brew test-bot --only-setup | tee brew_test_log.txt
+           if grep -q "Warning: 1 failed step ignored!" brew_test_log.txt; then
+             echo "Test failed. Exiting with failure."
+             exit 1
+           fi
 
-      - run: brew test-bot --only-tap-syntax
+      - run: |
+           brew test-bot --only-tap-syntax | tee brew_test_log.txt
+           if grep -q "Warning: 1 failed step ignored!" brew_test_log.txt; then
+             echo "Test failed. Exiting with failure."
+             exit 1
+           fi
 
-      - run: brew test-bot --only-formulae
+      - run: |
+           brew test-bot --only-formulae | tee brew_test_log.txt
+           if grep -q "Warning: 1 failed step ignored!" brew_test_log.txt; then
+             echo "Test failed. Exiting with failure."
+             exit 1
+           fi
         if: github.event_name == 'pull_request'
 
       - name: Upload bottles as artifact
