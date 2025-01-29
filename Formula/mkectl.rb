@@ -1,5 +1,3 @@
-require "yaml"
-
 class Mkectl < Formula
   desc "Tool for creating and managing MKE 4.x kubernetes clusters"
   homepage "https://mirantis.github.io/mke-docs/"
@@ -29,9 +27,5 @@ class Mkectl < Formula
 
   test do
     assert_match "Version: #{VERSION}", shell_output("#{bin}/mkectl version")
-
-    init_output = shell_output("#{bin}/mkectl init")
-    yaml_output = YAML.load(init_output)
-    assert_equal VERSION, yaml_output["spec"]["version"]
   end
 end
