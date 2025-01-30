@@ -22,16 +22,32 @@ jobs:
 
       - name: Get SHA256 Checksum
         run: |
-          ASSET_URL=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r '.assets[0].browser_download_url')
-          curl -L -o mkectl.tar.gz "$ASSET_URL"
-          echo "sha256=$(sha256sum mkectl.tar.gz | awk '{print $1}')" >> $GITHUB_ENV
+          ASSET_URL_DARWIN_X86=$(curl -s https://github.com/MirantisContainers/mke-release/releases/download/${{ env.version }}/mkectl_darwin_x86_64.tar.gz)
+          ASSET_URL_DARWIN_ARM64=$(curl -s https://github.com/MirantisContainers/mke-release/releases/download/${{ env.version }}/mkectl_darwin_arm64.tar.gz)
+          ASSET_URL_LINUX_X86=$(curl -s https://github.com/MirantisContainers/mke-release/releases/download/${{ env.version }}/mkectl_linux_x86_64.tar.gz)
+          ASSET_URL_LINUX_ARM64=$(curl -s https://github.com/MirantisContainers/mke-release/releases/download/${{ env.version }}/mkectl_linux_arm64.zip)
+
+          curl -L -o mkectl_darwin_x86_64.tar.gz "$ASSET_URL_DARWIN_X86"
+          echo "sha256_darwin_x86=$(sha256sum mkectl_darwin_x86_64.tar.gz | awk '{print $1}')" >> $GITHUB_ENV
+          
+          curl -L -o mkectl_darwin_arm64.tar.gz "ASSET_URL_DARWIN_ARM64"
+          echo "sha256_darwin_arm64=$(sha256sum mkectl_darwin_arm64.tar.gz | awk '{print $1}')" >> $GITHUB_ENV
+          
+          curl -L -o mkectl_linux_x86_64.tar.gz "ASSET_URL_LINUX_X86"
+          echo "sha256_linux_x86=$(sha256sum mkectl_linux_x86_64.tar.gz | awk '{print $1}')" >> $GITHUB_ENV
+          
+          curl -L -o mkectl_linux_arm64.tar.gz "ASSET_URL_LINUX_ARM64"
+          echo "sha256_linux_arm64=$(sha256sum mkectl_linux_arm64.tar.gz | awk '{print $1}')" >> $GITHUB_ENV
 
       - name: Update Homebrew Formula
         run: |
           FORMULA_PATH="Formula/mkectl.rb"
-          sed -i "s/VERSION = \".*\"/VERSION = \"${{ env.version }}\"/" $FORMULA_PATH
-          sed -i "s/sha256 \".*\"/sha256 \"${{ env.sha256 }}\"/" $FORMULA_PATH
-
+          sed -i -e "s/VERSION = \".*\"/VERSION = \"${{ env.version }}\"/" \
+                 -e "0,/sha256 \".*\"/s//sha256 \"${{ env.sha256_darwin_x86 }}\"/" \
+                 -e "1,/sha256 \".*\"/s//sha256 \"${{ env.sha256_darwin_arm64 }}\"/" \
+                 -e "2,/sha256 \".*\"/s//sha256 \"${{ env.sha256_linux_x86 }}\"/" \
+                 -e "3,/sha256 \".*\"/s//sha256 \"${{ env.sha256_linux_arm64 }}\"/" $FORMULA_PATH
+      
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions"
