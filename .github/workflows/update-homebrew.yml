@@ -1,9 +1,11 @@
 name: Update Homebrew Formula
 
 on:
-    release:
-      types: [created]
-    workflow_call:
+  pull_request_target: # Temporary just to make testing easier
+    types: ["labeled"]
+    branches: ["main"]
+  release:
+    types: [created]
 
 permissions:
   contents: write
@@ -20,24 +22,26 @@ jobs:
         id: release
         run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      - name: Get SHA256 Checksum
+      - name: Get SHA256 Checksums
         run: |
-          ASSET_URL_DARWIN_X86=$(curl -s https://github.com/MirantisContainers/mke-release/releases/download/${{ env.version }}/mkectl_darwin_x86_64.tar.gz)
-          ASSET_URL_DARWIN_ARM64=$(curl -s https://github.com/MirantisContainers/mke-release/releases/download/${{ env.version }}/mkectl_darwin_arm64.tar.gz)
-          ASSET_URL_LINUX_X86=$(curl -s https://github.com/MirantisContainers/mke-release/releases/download/${{ env.version }}/mkectl_linux_x86_64.tar.gz)
-          ASSET_URL_LINUX_ARM64=$(curl -s https://github.com/MirantisContainers/mke-release/releases/download/${{ env.version }}/mkectl_linux_arm64.zip)
-
-          curl -L -o mkectl_darwin_x86_64.tar.gz "$ASSET_URL_DARWIN_X86"
-          echo "sha256_darwin_x86=$(sha256sum mkectl_darwin_x86_64.tar.gz | awk '{print $1}')" >> $GITHUB_ENV
+          BASE_URL="https://github.com/MirantisContainers/mke-release/releases/download/${{ env.version }}"
           
-          curl -L -o mkectl_darwin_arm64.tar.gz "ASSET_URL_DARWIN_ARM64"
-          echo "sha256_darwin_arm64=$(sha256sum mkectl_darwin_arm64.tar.gz | awk '{print $1}')" >> $GITHUB_ENV
+          declare -A assets=(
+            ["mkectl_darwin_x86_64.tar.gz"]="sha256_darwin_x86"
+            ["mkectl_darwin_arm64.tar.gz"]="sha256_darwin_arm64"
+            ["mkectl_linux_x86_64.tar.gz"]="sha256_linux_x86"
+            ["mkectl_linux_arm64.zip"]="sha256_linux_arm64"
+          )
           
-          curl -L -o mkectl_linux_x86_64.tar.gz "ASSET_URL_LINUX_X86"
-          echo "sha256_linux_x86=$(sha256sum mkectl_linux_x86_64.tar.gz | awk '{print $1}')" >> $GITHUB_ENV
+          for asset in "${!assets[@]}"; do
+            url="$BASE_URL/$asset"
           
-          curl -L -o mkectl_linux_arm64.tar.gz "ASSET_URL_LINUX_ARM64"
-          echo "sha256_linux_arm64=$(sha256sum mkectl_linux_arm64.tar.gz | awk '{print $1}')" >> $GITHUB_ENV
+            echo "Downloading: $url"
+            curl -L -o "$asset" "$url" || { echo "Failed to download $asset"; exit 1; }
+          
+            checksum=$(sha256sum "$asset" | awk '{print $1}')
+            echo "${assets[$asset]}=$checksum" >> $GITHUB_ENV
+          done
 
       - name: Update Homebrew Formula
         run: |
@@ -47,7 +51,7 @@ jobs:
                  -e "1,/sha256 \".*\"/s//sha256 \"${{ env.sha256_darwin_arm64 }}\"/" \
                  -e "2,/sha256 \".*\"/s//sha256 \"${{ env.sha256_linux_x86 }}\"/" \
                  -e "3,/sha256 \".*\"/s//sha256 \"${{ env.sha256_linux_arm64 }}\"/" $FORMULA_PATH
-      
+
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions"
