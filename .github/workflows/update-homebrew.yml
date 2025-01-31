@@ -2,9 +2,10 @@ name: Update Homebrew Formula
 
 on:
   workflow_dispatch:
-  pull_request_target: # Temporary just to make testing easier
-    types: ["labeled"]
-    branches: ["main"]
+    inputs:
+      version:
+        description: "The version of the mkectl formula to update to"
+        required: true
   release:
     types: [created]
 
@@ -21,8 +22,12 @@ jobs:
 
       - name: Get Latest Release Info
         id: release
-#        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV #TODO uncomment
-        run: echo "version=v4.0.1-rc.4" >> $GITHUB_ENV
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "version=${{ inputs.version }}" >> $GITHUB_ENV
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          fi
 
       - name: Get SHA256 Checksums
         run: |
