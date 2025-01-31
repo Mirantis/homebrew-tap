@@ -1,6 +1,7 @@
 name: Update Homebrew Formula
 
 on:
+  workflow_dispatch:
   pull_request_target: # Temporary just to make testing easier
     types: ["labeled"]
     branches: ["main"]
