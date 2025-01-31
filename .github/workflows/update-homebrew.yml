@@ -6,8 +6,6 @@ on:
       version:
         description: "The version of the mkectl formula to update to"
         required: true
-  release:
-    types: [created]
 
 permissions:
   contents: write
@@ -23,11 +21,7 @@ jobs:
       - name: Get Latest Release Info
         id: release
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "version=${{ inputs.version }}" >> $GITHUB_ENV
-          else
-            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-          fi
+          echo "version=${{ inputs.version }}" >> $GITHUB_ENV
 
       - name: Get SHA256 Checksums
         run: |
@@ -37,7 +31,6 @@ jobs:
             ["mkectl_darwin_x86_64.tar.gz"]="sha256_darwin_x86"
             ["mkectl_darwin_arm64.tar.gz"]="sha256_darwin_arm64"
             ["mkectl_linux_x86_64.tar.gz"]="sha256_linux_x86"
-            ["mkectl_linux_arm64.tar.gz"]="sha256_linux_arm64"
           )
           
           for asset in "${!assets[@]}"; do
@@ -71,8 +64,6 @@ jobs:
                       $0 = "    sha256 \"${{ env.sha256_darwin_arm64 }}\""
                   } else if (count == 3) {
                       $0 = "    sha256 \"${{ env.sha256_linux_x86 }}\""
-                  } else if (count == 4) {
-                      $0 = "    sha256 \"${{ env.sha256_linux_arm64 }}\""
                   }
               }
 
