@@ -66,6 +66,22 @@ jobs:
                       $0 = "    sha256 \"${{ env.sha256_linux_x86 }}\""
                   }
               }
+          
+              /bottle do/ {
+                in_bottle_block = 1
+                print
+                next
+              }
+
+              in_bottle_block && /sha256/ {
+                  if ($0 ~ /ventura/) {
+                    $0 = "    sha256 cellar: :any_skip_relocation, ventura: \"${{ env.sha256_darwin_x86 }}\""
+                  } else if ($0 ~ /arm64_sonoma/) {
+                    $0 = "    sha256 cellar: :any_skip_relocation, arm64_sonoma: \"${{ env.sha256_darwin_arm64 }}\""
+                  } else if ($0 ~ /x86_64_linux/) {
+                    $0 = "    sha256 cellar: :any_skip_relocation, x86_64_linux: \"${{ env.sha256_linux_x86 }}\""
+                  }
+              }
 
               { print }
           ' "$FORMULA_PATH" > tmp && mv tmp "$FORMULA_PATH"
