@@ -5,6 +5,9 @@ class Mkectl < Formula
 
   version VERSION
 
+  depends_on "k0sproject/tap/k0sctl"
+  depends_on "kubernetes-cli"
+
   if OS.mac? && Hardware::CPU.intel?
     url "https://github.com/MirantisContainers/mke-release/releases/download/#{VERSION}/mkectl_darwin_x86_64.tar.gz"
     sha256 "72df11d51a0d58053c4554ac0aef2c0ec6380dc7caa2a9897e607c03a86d92c7"
