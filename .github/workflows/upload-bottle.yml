@@ -1,0 +1,74 @@
+name: Upload bottles
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version of the mkectl bottles to release"
+        required: true
+  release:
+    types: [prereleased , released]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-formula:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Get Version Info
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            VERSION=${{ github.event.release.tag_name }}
+          else
+            VERSION=${{ inputs.version }}
+          fi
+          echo "version=${VERSION}" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          brew install kubernetes-cli@1.31
+          
+          #install k0sctl v0.19.4
+          brew tap k0sproject/tap
+          cd "$(brew --repo k0sproject/tap)"
+          git fetch origin
+          git checkout 247279090669681e6bee89c3b270e0893ca50c58    
+
+      - name: Build the Homebrew bottle
+        run: |
+          brew install --build-bottle mkectl
+          brew bottle mkectl
+
+      - name: Create a GitHub Release (if not existing)
+        run: |
+          TAG="mkectl-${{ env.version }}"
+          RELEASE_EXISTS=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG} | jq -r '.id')
+
+          if [ "$RELEASE_EXISTS" == "null" ]; then
+            curl -X POST \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -d "{\"tag_name\":\"${TAG}\", \"name\":\"${TAG}\"}" \
+              https://api.github.com/repos/${{ github.repository }}/releases
+          fi
+
+      - name: Upload the Bottle to GitHub Release
+        run: |
+          BOTTLE_PATH=$(brew --prefix)/Homebrew/Library/Taps/homebrew/homebrew-core/Formula/mkectl-*.bottle.tar.gz
+          TAG="mkectl-${{ env.version }}"
+
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -F "file=@${BOTTLE_PATH}" \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG} | jq -r '.id')/assets?name=$(basename $BOTTLE_PATH)"
+
+      - name: Clean up bottles
+        run: rm -f $(brew --prefix)/Homebrew/Library/Taps/homebrew/homebrew-core/Formula/mkectl-*.bottle.tar.gz
