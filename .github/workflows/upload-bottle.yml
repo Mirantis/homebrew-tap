@@ -1,13 +1,8 @@
 name: Upload bottles
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "The version of the mkectl bottles to release"
-        required: true
-  release:
-    types: [prereleased , released]
+  pull_request:
+    types: [ labeled ]
 
 permissions:
   contents: write
@@ -15,6 +10,7 @@ permissions:
 
 jobs:
   upload-bottle:
+    if: ${{ github.event.label.name == 'bottle' }}
     strategy:
       matrix:
         os: [ ubuntu-22.04, macos-13, macos-14 ]
@@ -25,21 +21,18 @@ jobs:
 
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Get Version Info
         run: |
-          if [ "${{ github.event_name }}" = "release" ]; then
-            VERSION=${{ github.event.release.tag_name }}
-          else
-            VERSION=${{ inputs.version }}
-          fi
+          VERSION=$(grep 'VERSION = ' Formula/mkectl.rb | sed 's/VERSION = "\(.*\)".freeze/\1/' | sed 's/^[[:space:]]*//')
           echo "version=${VERSION}" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: |
           brew install kubernetes-cli@1.31
           
-          #install k0sctl v0.19.4
           brew tap k0sproject/tap
           cd "$(brew --repo k0sproject/tap)"
           git fetch origin
@@ -47,11 +40,17 @@ jobs:
 
       - name: Build the Homebrew bottle
         run: |
+          rm -f mkectl--*.tar.gz
+
           brew install --build-bottle mkectl
           brew bottle mkectl
 
           bottle_file=$(ls -1 mkectl--*.tar.gz | head -n 1)
-          echo "bottle_path=$(pwd)/$bottle_file" >> $GITHUB_ENV
+          corrected_bottle_file="${bottle_file/.1.tar.gz/.tar.gz}"
+          corrected_bottle_file=$(echo "$corrected_bottle_file" | sed 's/--/-/')
+
+          mv "$bottle_file" "$corrected_bottle_file"
+          echo "bottle_path=$(pwd)/$corrected_bottle_file" >> $GITHUB_ENV
 
       - name: Create a GitHub Release (if not existing)
         run: |
@@ -64,6 +63,14 @@ jobs:
               -d "{\"tag_name\":\"${TAG}\", \"name\":\"${TAG}\"}" \
               https://api.github.com/repos/${{ github.repository }}/releases
           fi
+          
+          echo "Waiting for the release to become available..."
+          until [ "$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG} | jq -r '.id')" != "null" ]; do
+            echo "Release not available yet. Retrying in 10 seconds..."
+            sleep 10
+          done
+      
+          echo "Release ${TAG} is now available."
 
       - name: Upload the Bottle to GitHub Release
         run: |
@@ -76,5 +83,41 @@ jobs:
             -F "file=@${{ env.bottle_path }}" \
             "https://uploads.github.com/repos/${{ github.repository }}/releases/$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG} | jq -r '.id')/assets?name=$(basename ${{ env.bottle_path }})"
 
+      - name: Update Homebrew Formula
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git checkout -b update-mkectl-${{ env.version }}
+
+          FORMULA_PATH="Formula/mkectl.rb"
+          
+          checksum=$(sha256sum "${{ env.bottle_path }}" | awk '{print $1}')
+          
+          awk '
+              /bottle do/ {
+                in_bottle_block = 1
+                print
+                next
+              }
+
+              in_bottle_block && /sha256/ {
+                  if ($0 ~ /ventura/ && ${{ matrix.os }} == "macos-13") {
+                    $0 = "    sha256 cellar: :any_skip_relocation, ventura: \"$checksum\""
+                  } else if ($0 ~ /arm64_sonoma/ && ${{ matrix.os }} == "macos-14") {
+                    $0 = "    sha256 cellar: :any_skip_relocation, arm64_sonoma: \"$checksum\""
+                  } else if ($0 ~ /x86_64_linux/ && ${{ matrix.os }} == "ubuntu-22.04" {
+                    $0 = "    sha256 cellar: :any_skip_relocation, x86_64_linux: \"$checksum\""
+                  }
+              }
+
+              { print }
+          ' "$FORMULA_PATH" > tmp && mv tmp "$FORMULA_PATH"
+
       - name: Clean up bottles
         run: rm -f ${{ env.bottle_path }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: update-mkectl-${{ env.version }}
+          base: main
