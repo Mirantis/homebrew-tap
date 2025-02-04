@@ -14,8 +14,11 @@ permissions:
   pull-requests: write
 
 jobs:
-  update-formula:
-    runs-on: ubuntu-22.04
+  upload-bottle:
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04, macos-13, macos-14 ]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@master
@@ -47,6 +50,9 @@ jobs:
           brew install --build-bottle mkectl
           brew bottle mkectl
 
+          bottle_file=$(ls -1 mkectl--*.tar.gz | head -n 1)
+          echo "bottle_path=$(pwd)/$bottle_file" >> $GITHUB_ENV
+
       - name: Create a GitHub Release (if not existing)
         run: |
           TAG="mkectl-${{ env.version }}"
@@ -61,14 +67,14 @@ jobs:
 
       - name: Upload the Bottle to GitHub Release
         run: |
-          BOTTLE_PATH=$(brew --prefix)/Homebrew/Library/Taps/homebrew/homebrew-core/Formula/mkectl-*.bottle.tar.gz
+          echo "Uploading bottle: ${{ env.bottle_path }}"
           TAG="mkectl-${{ env.version }}"
 
           curl -X POST \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -F "file=@${BOTTLE_PATH}" \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG} | jq -r '.id')/assets?name=$(basename $BOTTLE_PATH)"
+            -F "file=@${{ env.bottle_path }}" \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG} | jq -r '.id')/assets?name=$(basename ${{ env.bottle_path }})"
 
       - name: Clean up bottles
-        run: rm -f $(brew --prefix)/Homebrew/Library/Taps/homebrew/homebrew-core/Formula/mkectl-*.bottle.tar.gz
+        run: rm -f ${{ env.bottle_path }}
