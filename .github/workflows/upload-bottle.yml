@@ -24,10 +24,18 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Load environment
+      - name: Load environment variables on Linux
+        if: ${{ matrix.os }} == 'ubuntu-22.04'
         uses: c-py/action-dotenv-to-setenv@v4
         with:
           env-file: .github/development.env
+
+      - name: Load environment variables on macOS
+        if: ${{ matrix.os }} != 'ubuntu-22.04'
+        run: |
+          set -a
+          source .github/development.env
+          set +a
 
       - name: Get Version Info
         run: |
