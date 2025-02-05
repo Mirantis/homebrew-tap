@@ -75,7 +75,7 @@ jobs:
           rm mkectl_*.tar.gz
           cp $FORMULA_PATH Formula/mkectl@${{ env.version }}.rb
           stripped_version=$(echo "${{ env.version }}" | tr -d '.')
-          sed -i "s/class Mkectl/class Mkectl@${stripped_version}/g" Formula/mkectlAT${{ env.version }}.rb
+          sed -i "s/class Mkectl/class MkectlAT${stripped_version}/g" Formula/mkectl@${{ env.version }}.rb
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
