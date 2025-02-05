@@ -102,6 +102,7 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
+          git config pull.ff only
           git checkout update-mkectl-${{ env.version }}
           git pull
 
@@ -138,13 +139,9 @@ jobs:
           cat $FORMULA_PATH
           
           cp $FORMULA_PATH Formula/mkectl@${{ env.version }}.rb
-
-      - name: Clean up bottles
-        run: rm -f ${{ env.bottle_path }}
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
-        with:
-          branch: update-mkectl-${{ env.version }}
-          base: main
-          commit-message: "Update SHA for ${{ matrix.os }} bottle"
+          rm -f ${{ env.bottle_path }}
+          
+          git add $FORMULA_PATH
+          git add Formula/mkectl@${{ env.version }}.rb
+          git commit -m "Update bottle for ${{ matrix.os }} to ${{ env.version }}"
+          git push origin update-mkectl-${{ env.version }}
