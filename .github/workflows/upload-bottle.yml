@@ -103,6 +103,7 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git checkout update-mkectl-${{ env.version }}
+          git pull
 
           FORMULA_PATH="Formula/mkectl.rb"
           
@@ -111,6 +112,8 @@ jobs:
           else
             checksum=$(shasum -a 256 "${{ env.bottle_path }}" | awk '{print $1}')
           fi
+
+          echo "checksum is $checksum"
           
           awk '
               /bottle do/ {
@@ -131,6 +134,8 @@ jobs:
 
               { print }
           ' "$FORMULA_PATH" > tmp && mv tmp "$FORMULA_PATH"
+
+          cat $FORMULA_PATH
           
           cp $FORMULA_PATH Formula/mkectl@${{ env.version }}.rb
 
