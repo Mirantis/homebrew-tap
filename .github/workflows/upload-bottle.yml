@@ -12,6 +12,7 @@ jobs:
   upload-bottle:
     if: ${{ github.event.label.name == 'bottle' }}
     strategy:
+      max-parallel: 1
       matrix:
         os: [ ubuntu-22.04, macos-13, macos-14 ]
     runs-on: ${{ matrix.os }}
