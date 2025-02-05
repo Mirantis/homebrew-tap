@@ -116,7 +116,7 @@ jobs:
 
           echo "checksum is $checksum"
           
-          awk '
+          awk -v matrixos="${{ matrix.os }}" -v checksum="$checksum" '
               /bottle do/ {
                 in_bottle_block = 1
                 print
@@ -124,11 +124,11 @@ jobs:
               }
 
               in_bottle_block && /sha256/ {
-                  if ($0 ~ /ventura/ && ${{ matrix.os }} == "macos-13") {
+                  if ($0 ~ /ventura/ && $matrixos == "macos-13") {
                     $0 = "    sha256 cellar: :any_skip_relocation, ventura: \"$checksum\""
-                  } else if ($0 ~ /arm64_sonoma/ && ${{ matrix.os }} == "macos-14") {
+                  } else if ($0 ~ /arm64_sonoma/ && $matrixos == "macos-14") {
                     $0 = "    sha256 cellar: :any_skip_relocation, arm64_sonoma: \"$checksum\""
-                  } else if ($0 ~ /x86_64_linux/ && ${{ matrix.os }} == "ubuntu-22.04") {
+                  } else if ($0 ~ /x86_64_linux/ && $matrixos == "ubuntu-22.04") {
                     $0 = "    sha256 cellar: :any_skip_relocation, x86_64_linux: \"$checksum\""
                   }
               }
