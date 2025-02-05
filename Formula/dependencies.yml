@@ -1,4 +1,0 @@
-# These dependencies are used when creating bottles for new releases.
-
-k0sctl_tap_commit: "247279090669681e6bee89c3b270e0893ca50c58" ## k0sctl v0.19.4
-kubectl_ver: "1.31"
