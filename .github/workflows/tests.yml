@@ -50,6 +50,7 @@ jobs:
              echo "Test failed. Exiting with failure."
              exit 1
            fi
+        if: github.event_name == 'pull_request'
 
       - name: Upload bottles as artifact
         uses: actions/upload-artifact@v4
