@@ -16,6 +16,11 @@ jobs:
         os: [ ubuntu-22.04, macos-13, macos-14 ]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Load environment
+        uses: c-py/action-dotenv-to-setenv@v4
+        with:
+          env-file: .github/development.env
+      
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@master
 
