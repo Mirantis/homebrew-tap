@@ -42,15 +42,16 @@ jobs:
            fi
 
       - run: |
+           brew test-bot --only-tap-syntax | tee brew_test_log.txt
+           
+      - run: |
            brew test-bot --only-formulae | tee brew_test_log.txt
            if grep -q "Warning: 1 failed step ignored!" brew_test_log.txt; then
              echo "Test failed. Exiting with failure."
              exit 1
            fi
-        if: github.event_name == 'pull_request'
 
       - name: Upload bottles as artifact
-        if: always() && github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: bottles_${{ matrix.os }}
