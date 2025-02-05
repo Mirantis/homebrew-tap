@@ -21,7 +21,7 @@ jobs:
       - name: Get Latest Release Info
         id: release
         run: |
-          echo "version=${{ inputs.version }}" >> $GITHUB_ENV
+          echo "version=${{ inputs.version }}" >> "$GITHUB_ENV"
 
       - name: Get SHA256 Checksums
         run: |
@@ -40,7 +40,7 @@ jobs:
             curl -L -o "$asset" "$url" || { echo "Failed to download $asset"; exit 1; }
           
             checksum=$(sha256sum "$asset" | awk '{print $1}')
-            echo "${assets[$asset]}=$checksum" >> $GITHUB_ENV
+            echo "${assets[$asset]}=$checksum" >> "$GITHUB_ENV"
           done
 
       - name: Update Homebrew Formula
