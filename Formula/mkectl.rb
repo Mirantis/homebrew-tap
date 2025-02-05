@@ -26,7 +26,7 @@ class Mkectl < Formula
   end
 
   depends_on "k0sproject/tap/k0sctl"
-  depends_on "kubernetes-cli"
+  depends_on "kubernetes-cli@1.31"
 
   def install
     bin.install "mkectl"
