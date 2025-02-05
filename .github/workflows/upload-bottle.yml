@@ -141,7 +141,11 @@ jobs:
           
           cp $FORMULA_PATH Formula/mkectl@${{ env.version }}.rb
           stripped_version=$(echo "${{ env.version }}" | tr -d '.')
-          sed -i "s/class Mkectl/class MkectlAT${stripped_version}/g" Formula/mkectl@${{ env.version }}.rb
+          if [ "${{ matrix.os }}" == "ubuntu-22.04" ]; then
+            sed -i "s/class Mkectl/class MkectlAT${stripped_version}/g" Formula/mkectl@${{ env.version }}.rb
+          else
+            sed -i '' "s/class Mkectl/class MkectlAT${stripped_version}/g" Formula/mkectl@${{ env.version }}.rb
+          fi
 
           rm -f ${{ env.bottle_path }}
           
