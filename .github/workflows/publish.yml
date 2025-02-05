@@ -6,7 +6,11 @@ on:
       - labeled
 
 jobs:
+  tests:
+    uses: ./.github/workflows/tests.yml
+
   pr-pull:
+    needs: [tests]
     if: contains(github.event.pull_request.labels.*.name, 'pr-pull')
     runs-on: ubuntu-22.04
     permissions:
