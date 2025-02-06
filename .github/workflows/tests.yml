@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        if: github.event_name == 'workflow_call'
+        if: github.event.inputs.checkout_ref != ''
         with:
           ref: ${{ github.event.inputs.checkout_ref }}
 
@@ -61,11 +61,11 @@ jobs:
              echo "Test failed. Exiting with failure."
              exit 1
            fi
-        if: github.event_name == 'pull_request' || github.event_name == 'workflow_call'
+        if: github.event_name == 'pull_request' || github.event.inputs.checkout_ref != ''
 
       - name: Upload bottles as artifact
         uses: actions/upload-artifact@v4
-        if: github.event_name == 'pull_request' || github.event_name == 'workflow_call'
+        if: github.event_name == 'pull_request' || github.event.inputs.checkout_ref != ''
         with:
           name: bottles_${{ matrix.os }}
           path: '*.bottle.*'
