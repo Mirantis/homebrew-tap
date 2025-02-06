@@ -37,7 +37,6 @@ jobs:
         run: |
           set -a
           source .github/development.env
-          echo "K0SCTL_TAP_COMMIT=${K0SCTL_TAP_COMMIT}" >> "$GITHUB_ENV"
           echo "KUBECTL_VER=${KUBECTL_VER}" >> "$GITHUB_ENV"
           set +a
 
@@ -48,12 +47,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install kubernetes-cli@${{ env.KUBECTL_VER }}
-          
-          brew tap k0sproject/tap
-          cd "$(brew --repo k0sproject/tap)"
-          git fetch origin
-          git checkout ${{ env.K0SCTL_TAP_COMMIT }}    
+          brew install kubernetes-cli@${{ env.KUBECTL_VER }}  
 
       - name: Build the Homebrew bottle
         run: |

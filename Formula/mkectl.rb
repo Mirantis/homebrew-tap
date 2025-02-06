@@ -26,22 +26,7 @@ class Mkectl < Formula
     sha256 cellar: :any_skip_relocation, x86_64_linux: "2818dabfa3c380729a87ddd91cf4d19e462a0d9bf3478c5759d25b2654f0a626"
   end
 
-  K0SCTL_COMMIT = "abcdef1234567890abcdef1234567890abcdef12" # Replace with actual commit
-
-  def self.require_universal_deps
-    tap_dir = Utils.safe_popen_read("brew", "--repo", "k0sproject/tap").strip
-    odie "k0sproject/tap is not tapped" unless File.directory?(tap_dir)
-
-    system "git", "-C", tap_dir, "fetch", "--all"
-    system "git", "-C", tap_dir, "checkout", K0SCTL_COMMIT
-
-    current_commit = Utils.safe_popen_read("git", "-C", tap_dir, "rev-parse", "HEAD").strip
-    odie "Expected commit #{K0SCTL_COMMIT}, but got #{current_commit}" unless current_commit == K0SCTL_COMMIT
-  end
-
-  depends_on "k0sproject/tap/k0sctl"
   depends_on "kubernetes-cli@1.31"
-
 
   def install
     bin.install "mkectl"
