@@ -154,7 +154,7 @@ jobs:
           git commit -m "Update bottle for ${{ matrix.os }} to ${{ env.version }}"
           git push origin update-mkectl-${{ env.version }}
 
-    tests:
+  tests:
     needs: upload-bottle
     uses: ./.github/workflows/tests.yml
     with:
