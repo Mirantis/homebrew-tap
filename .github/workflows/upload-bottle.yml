@@ -153,3 +153,9 @@ jobs:
           git add Formula/mkectl@${{ env.version }}.rb
           git commit -m "Update bottle for ${{ matrix.os }} to ${{ env.version }}"
           git push origin update-mkectl-${{ env.version }}
+
+    tests:
+    needs: upload-bottle
+    uses: ./.github/workflows/tests.yml
+    with:
+      checkout_ref: ${{ github.event.pull_request.head.sha }}
