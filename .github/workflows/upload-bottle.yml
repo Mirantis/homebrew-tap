@@ -80,6 +80,8 @@ jobs:
               -d "{\"tag_name\":\"${TAG}\", \"name\":\"${TAG}\"}" \
               https://api.github.com/repos/${{ github.repository }}/releases
           fi
+
+          sleep 10
           
           echo "Waiting for the release to become available..."
           until [ "$(curl -H 'Authorization: token ${{ secrets.GITHUB_TOKEN }}' -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG} | jq -r '.id')" != "null" ]; do
