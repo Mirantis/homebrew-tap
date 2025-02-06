@@ -29,7 +29,18 @@ class Mkectl < Formula
   depends_on "k0sproject/tap/k0sctl"
   depends_on "kubernetes-cli@1.31"
 
+  K0SCTL_COMMIT = "247279090669681e6bee89c3b270e0893ca50c58".freeze
+
   def install
+    tap_dir = Utils.safe_popen_read("brew", "--repo", "k0sproject/tap").strip
+    odie "k0sproject/tap is not tapped" unless File.directory?(tap_dir)
+
+    system "git", "-C", tap_dir, "fetch", "--all"
+    system "git", "-C", tap_dir, "checkout", K0SCTL_COMMIT
+
+    current_commit = Utils.safe_popen_read("git", "-C", tap_dir, "rev-parse", "HEAD").strip
+    odie "Expected commit #{K0SCTL_COMMIT}, but got #{current_commit}" unless current_commit == K0SCTL_COMMIT
+
     bin.install "mkectl"
   end
 
