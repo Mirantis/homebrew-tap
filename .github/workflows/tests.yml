@@ -23,9 +23,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        if: github.event.inputs.checkout_ref != ''
+        if: inputs.checkout_ref != ''
         with:
-          ref: ${{ github.event.inputs.checkout_ref }}
+          ref: ${{ inputs.checkout_ref }}
 
       - name: Set up Homebrew
         id: set-up-homebrew
@@ -55,17 +55,17 @@ jobs:
       - run: |
            brew test-bot --only-tap-syntax | tee brew_test_log.txt
            
-      - run: |
+      - if: github.event_name == 'pull_request' || inputs.checkout_ref != ''
+        run: |
            brew test-bot --only-formulae | tee brew_test_log.txt
            if grep -q "Warning: 1 failed step ignored!" brew_test_log.txt; then
              echo "Test failed. Exiting with failure."
              exit 1
            fi
-        if: github.event_name == 'pull_request' || github.event.inputs.checkout_ref != ''
 
       - name: Upload bottles as artifact
         uses: actions/upload-artifact@v4
-        if: github.event_name == 'pull_request' || github.event.inputs.checkout_ref != ''
+        if: github.event_name == 'pull_request' || inputs.checkout_ref != ''
         with:
           name: bottles_${{ matrix.os }}
           path: '*.bottle.*'
