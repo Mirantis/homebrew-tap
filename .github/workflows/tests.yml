@@ -1,7 +1,7 @@
 name: brew test-bot
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       checkout_ref:
         description: 'Ref to checkout'
