@@ -62,7 +62,7 @@ jobs:
            
       - if: github.event_name == 'pull_request' || inputs.checkout_ref != ''
         run: |
-           brew test-bot --only-formulae | tee brew_test_log.txt
+           brew test-bot --only-formulae mkectl | tee brew_test_log.txt
            if grep -q "Warning: 1 failed step ignored!" brew_test_log.txt; then
              echo "Test failed. Exiting with failure."
              exit 1
