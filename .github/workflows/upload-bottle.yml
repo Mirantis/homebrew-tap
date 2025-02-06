@@ -7,6 +7,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 
 jobs:
   upload-bottle:
@@ -161,7 +162,7 @@ jobs:
       - name: Trigger tests dispatch
         run: |
           curl --request POST \
-            --url https://api.github.com/repos/Mirantis/homebrew-tap/actions/workflows/tests.yml/dispatches \
+            --url https://api.github.com/repos/${{ github.repository }}/actions/workflows/tests.yml/dispatches \
             --header "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             --header "Content-Type: application/json" \
             --data '{"ref": "${{ github.event.pull_request.head.ref }}", "inputs": {"checkout_ref": "${{ github.sha }}"}}'
