@@ -7,10 +7,6 @@ on:
         description: 'Ref to checkout'
         required: true
         type: string
-      pr_number:
-        description: 'PR Number'
-        required: true
-        type: string
   push:
     branches:
       - main

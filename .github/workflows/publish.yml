@@ -6,15 +6,7 @@ on:
       - labeled
 
 jobs:
-  tests:
-    if: contains(github.event.pull_request.labels.*.name, 'pr-pull')
-    uses: ./.github/workflows/tests.yml
-    with:
-      checkout_ref: ${{ github.event.pull_request.head.sha }}
-      pr_number: ${{ github.event.pull_request.number }}
-
   pr-pull:
-    needs: [tests]
     if: contains(github.event.pull_request.labels.*.name, 'pr-pull')
     runs-on: ubuntu-22.04
     permissions:
