@@ -7,6 +7,10 @@ on:
         description: 'Ref to checkout'
         required: true
         type: string
+      pr_number:
+        description: 'PR Number'
+        required: true
+        type: string
   push:
     branches:
       - main
@@ -55,13 +59,21 @@ jobs:
       - run: |
            brew test-bot --only-tap-syntax | tee brew_test_log.txt
            
-      - if: github.event_name == 'pull_request' || inputs.checkout_ref != ''
+      - if: github.event_name == 'pull_request'
         run: |
            brew test-bot --only-formulae | tee brew_test_log.txt
            if grep -q "Warning: 1 failed step ignored!" brew_test_log.txt; then
              echo "Test failed. Exiting with failure."
              exit 1
            fi
+
+      - if: inputs.pr_number != '' && inputs.checkout_ref != ''
+        run: |
+          brew test-bot --only-formulae --ci-pull-request ${{ inputs.pr_number }} | tee brew_test_log.txt
+          if grep -q "Warning: 1 failed step ignored!" brew_test_log.txt; then
+            echo "Test failed. Exiting with failure."
+            exit 1
+          fi
 
       - name: Upload bottles as artifact
         uses: actions/upload-artifact@v4
