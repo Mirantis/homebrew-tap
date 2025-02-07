@@ -100,7 +100,6 @@ jobs:
         run: |
           TAG="mkectl-${{ env.version }}"
 
-          # Get the release ID with retry logic
           get_release_id() {
             local retries=5
             local count=0
@@ -136,7 +135,7 @@ jobs:
             while [ $count -lt $retries ]; do
               response=$(curl -s -w "%{http_code}" -o response.json -X POST \
                 -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                -H "Content-Type: application/json" \
+                -H "Content-Type: application/octet-stream" \
                 -F "file=@${provided_bottle_path}" \
                 "https://uploads.github.com/repos/${{ github.repository }}/releases/${RELEASE_ID}/assets?name=$(basename "${provided_bottle_path}")")
 
