@@ -21,7 +21,7 @@ class Mkectl < Formula
   bottle do
     root_url "https://github.com/Mirantis/homebrew-tap/releases/download/mkectl-#{VERSION}"
     sha256 cellar: :any_skip_relocation, arm64_sonoma: "1386060018ba74088f85a6f2538643c8701dd356de87630ac5440edde5c58a9a"
-    sha256 cellar: :any_skip_relocation, ventura: "00a7a42791e4f6811b045d24f5bd5f483e93939515d197294bd8a48e30ff1d18"
+    sha256 cellar: :any_skip_relocation, ventura: "82f99165b166a47b9cf95b6bcb92df3d9dc7b72136ac4d6da555d0b9f8d20472"
     sha256 cellar: :any_skip_relocation, x86_64_linux: "7f8b041ca8f88e03d0f1ca42602210f51c74035fdabf55238a88710aa313f70f"
   end
 
