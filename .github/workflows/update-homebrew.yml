@@ -25,7 +25,7 @@ jobs:
 
       - name: Get SHA256 Checksums
         run: |
-          BASE_URL="https://github.com/MirantisContainers/mke-release/releases/download/${{ env.version }}"
+          BASE_URL="https://github.com/MirantisContainers/mke-release/releases/download/v${{ env.version }}"
           
           declare -A assets=(
             ["mkectl_darwin_x86_64.tar.gz"]="sha256_darwin_x86"
