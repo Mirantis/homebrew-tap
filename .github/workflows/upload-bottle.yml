@@ -57,7 +57,8 @@ jobs:
           brew bottle mkectl
 
           bottle_file=$(ls -1 mkectl--*.tar.gz | head -n 1)
-          corrected_bottle_file=$(echo "bottle_file" | sed 's/--/-/')
+          corrected_bottle_file="${bottle_file/.[0-9]*.tar.gz/.tar.gz}"
+          corrected_bottle_file=$(echo "$corrected_bottle_file" | sed 's/--/-/')
 
           mv "$bottle_file" "$corrected_bottle_file"
           echo "bottle_path=$(pwd)/$corrected_bottle_file" >> "$GITHUB_ENV"
@@ -67,7 +68,7 @@ jobs:
           brew install --build-bottle mkectl@${{ env.version }}
           brew bottle mkectl@${{ env.version }}
           
-          versioned_bottle_file=$(ls -1 mkectl-${{ env.version }}*.tar.gz | head -n 1)
+          versioned_bottle_file=$(ls -1 mkectl@${{ env.version }}*.tar.gz | head -n 1)
           cversioned_bottle_file=$(echo "versioned_bottle_file" | sed 's/--/-/')
           
           mv "versioned_bottle_file" "cversioned_bottle_file"
