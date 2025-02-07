@@ -104,6 +104,18 @@ jobs:
             -F "file=@${{ env.bottle_path }}" \
             "https://uploads.github.com/repos/${{ github.repository }}/releases/$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG} | jq -r '.id')/assets?name=$(basename ${{ env.bottle_path }})"
 
+      - name: Upload the Versioned Bottle to GitHub Release
+        run: |
+          echo "Uploading bottle: ${{ env.versioned_bottle_path }}"
+          TAG="mkectl-${{ env.version }}"
+
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -F "file=@${{ env.versioned_bottle_path }}" \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG} | jq -r '.id')/assets?name=$(basename ${{ env.versioned_bottle_path }})"
+
+
       - name: Update Homebrew Formula
         run: |
           ## TODO: DRY this out
