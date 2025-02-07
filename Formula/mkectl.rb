@@ -1,7 +1,7 @@
 class Mkectl < Formula
   desc "Tool for creating and managing MKE 4.x kubernetes clusters"
   homepage "https://mirantis.github.io/mke-docs/"
-  VERSION = "v4.0.0".freeze
+  VERSION = "4.0.0".freeze
 
   version VERSION
 
@@ -19,7 +19,7 @@ class Mkectl < Formula
   end
 
   bottle do
-    root_url "https://github.com/Mirantis/homebrew-tap/releases/download/mkectl-v4.0.0"
+    root_url "https://github.com/Mirantis/homebrew-tap/releases/download/mkectl-4.0.0"
     rebuild 1
     sha256 cellar: :any_skip_relocation, arm64_sonoma: "4c2bbb38d340be53a39a2d5bc7c137eb65d5d93bf871f85b91817cd3ca223bda"
     sha256 cellar: :any_skip_relocation, ventura:      "a11c056d1c74e3cab831c8ea89c1a7be3f2cc177aeafafb1b76f5a870b8d4e51"
@@ -33,6 +33,6 @@ class Mkectl < Formula
   end
 
   test do
-    assert_match "Version: #{VERSION}", shell_output("#{bin}/mkectl version")
+    assert_match "Version: v#{VERSION}", shell_output("#{bin}/mkectl version")
   end
 end
