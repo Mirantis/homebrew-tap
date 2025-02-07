@@ -57,7 +57,7 @@ jobs:
           brew bottle mkectl
 
           bottle_file=$(ls -1 mkectl--*.tar.gz | head -n 1)
-          corrected_bottle_file="${bottle_file/.1.tar.gz/.tar.gz}"
+          corrected_bottle_file="${bottle_file/.2.tar.gz/.tar.gz}"
           corrected_bottle_file=$(echo "$corrected_bottle_file" | sed 's/--/-/')
 
           mv "$bottle_file" "$corrected_bottle_file"
