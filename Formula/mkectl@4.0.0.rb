@@ -23,7 +23,7 @@ class MkectlAT400 < Formula
     rebuild 1
     sha256 cellar: :any_skip_relocation, arm64_sonoma: "2a28e5ef4e067684592704c0fb20a1f94480ce68e7ffcdb10f84754ed82e8577"
     sha256 cellar: :any_skip_relocation, ventura:      "329643f1e46554b81ed2c62ec2708657502bd166db0353ca1bbe636706520fde"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "d6fa128f908b70f011ebbc4d52425da5452fb655b0105576b697d4ae41852c37"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "3821a872605083b887c3b0e20ed1f852afe40b53cbe6c7a2d098b6b6e7e7cfdc"
   end
 
   depends_on "kubernetes-cli@1.31"
