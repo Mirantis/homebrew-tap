@@ -22,7 +22,7 @@ class Mkectl < Formula
     root_url "https://github.com/Mirantis/homebrew-tap/releases/download/mkectl-4.0.0"
     rebuild 1
     sha256 cellar: :any_skip_relocation, arm64_sonoma: "2a28e5ef4e067684592704c0fb20a1f94480ce68e7ffcdb10f84754ed82e8577"
-    sha256 cellar: :any_skip_relocation, ventura:      "329643f1e46554b81ed2c62ec2708657502bd166db0353ca1bbe636706520fde"
+    sha256 cellar: :any_skip_relocation, ventura: "3b062c7c9f5d0821254317002a226dff5b4bec88419bb0cc931d2966e36d70de"
     sha256 cellar: :any_skip_relocation, x86_64_linux: "e769157b461f285bc89a7654177430fbb56416455aafad231db1b4555a980d7c"
   end
 
