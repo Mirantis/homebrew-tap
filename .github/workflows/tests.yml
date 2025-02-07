@@ -47,7 +47,7 @@ jobs:
         id: find_versions
         if: ${{ env.checkout_ref != '' }}
         run: |
-          versions=$(git diff --name-only origin/main ${{ github.sha }} | grep -oE 'Formula/mkectl@[0-9.]+' | sed 's/Formula\/mkectl@//')
+          versions=$(git diff --name-only origin/main ${{ github.sha }} | grep -oE 'Formula/mkectl@[0-9.]+' | sed 's/Formula\/mkectl@//' | sed 's/\.$//')
           echo "Versions changed: $versions"
           echo "versions=$versions" >> "$GITHUB_OUTPUT"
 
