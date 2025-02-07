@@ -1,12 +1,6 @@
 name: brew test-bot
 
 on:
-  workflow_dispatch:
-    inputs:
-      checkout_ref:
-        description: 'Ref to checkout'
-        required: true
-        type: string
   push:
     branches:
       - main
@@ -23,14 +17,19 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        if: inputs.checkout_ref != ''
         with:
-          ref: ${{ inputs.checkout_ref }}
           fetch-depth: 0  # Required for brew test-bot to detect changes
 
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Find changed versioned mkectl formulas
+        id: find_versions
+        run: |
+          versions=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -oP 'Formula/mkectl@\K[0-9.]+')
+          echo "Versions changed: $versions"
+          echo "::set-output name=versions::$versions"
 
       - name: Cache Homebrew Bundler RubyGems
         uses: actions/cache@v4
@@ -56,7 +55,7 @@ jobs:
       - run: |
            brew test-bot --only-tap-syntax | tee brew_test_log.txt
            
-      - if: github.event_name == 'pull_request' || inputs.checkout_ref != ''
+      - if: github.event_name == 'pull_request'
         run: |
            brew test-bot --only-formulae mkectl | tee brew_test_log.txt
            if grep -q "Warning: 1 failed step ignored!" brew_test_log.txt; then
@@ -64,9 +63,18 @@ jobs:
              exit 1
            fi
 
+      - name: Run pr-pull for each changed version
+        if: github.event_name == 'pull_request' && steps.find_versions.outputs.versions != ''
+        run: |
+          versions=${{ steps.find_versions.outputs.versions }}
+          for version in $versions; do
+            echo "Running test-bot for mkectl@$version"
+            brew test-bot --only-formulae mkectl@$version | tee brew_test_log.txt
+          done
+
       - name: Upload bottles as artifact
         uses: actions/upload-artifact@v4
-        if: github.event_name == 'pull_request' || inputs.checkout_ref != ''
+        if: github.event_name == 'pull_request'
         with:
           name: bottles_${{ matrix.os }}
           path: '*.bottle.*'
