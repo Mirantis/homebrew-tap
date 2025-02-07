@@ -148,7 +148,7 @@ jobs:
               response=$(curl -s -w "%{http_code}" -o response.json -X POST \
                 -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                 -H "Content-Type: application/octet-stream" \
-                -F "file=@${provided_bottle_path}" \
+                --data-binary @"${provided_bottle_path}" \
                 "https://uploads.github.com/repos/${{ github.repository }}/releases/${RELEASE_ID}/assets?name=$(basename "${provided_bottle_path}")")
 
               if [ "$response" -eq 201 ]; then
