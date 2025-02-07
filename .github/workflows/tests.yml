@@ -1,6 +1,12 @@
 name: brew test-bot
 
 on:
+  workflow_dispatch:
+    inputs:
+      checkout_ref:
+        description: 'Ref to checkout'
+        required: true
+        type: string
   push:
     branches:
       - main
@@ -15,9 +21,20 @@ jobs:
         os: [ubuntu-22.04, macos-13, macos-14]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Determine Checkout Ref
+        if: github.event_name == 'workflow_dispatch' || github.event.name == 'pull_request'
+        run: |
+          if [ -z "${{ github.event.inputs.checkout_ref }}" ]; then
+            echo "checkout_ref=${{ github.event.ref }}" >> "GITHUB_ENV"
+          else
+            echo "checkout_ref=${{ github.event.inputs.checkout_ref }}" >> "GITHUB_ENV"
+          fi
+
       - name: Checkout Repository
         uses: actions/checkout@v4
+        if: ${{ env.checkout_ref != '' }}
         with:
+          ref: ${{ env.checkout_ref }}
           fetch-depth: 0  # Required for brew test-bot to detect changes
 
       - name: Set up Homebrew
@@ -26,10 +43,11 @@ jobs:
 
       - name: Find changed versioned mkectl formulas
         id: find_versions
+        if: ${{ env.checkout_ref != '' }}
         run: |
-          versions=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -oP 'Formula/mkectl@\K[0-9.]+')
+          versions=$(git diff --name-only origin/main ${{ github.sha }} | grep -oE 'Formula/mkectl@[0-9.]+' | sed 's/Formula\/mkectl@//')
           echo "Versions changed: $versions"
-          echo "::set-output name=versions::$versions"
+          echo "versions=$versions" >> "GITHUB_OUTPUT"
 
       - name: Cache Homebrew Bundler RubyGems
         uses: actions/cache@v4
@@ -55,7 +73,7 @@ jobs:
       - run: |
            brew test-bot --only-tap-syntax | tee brew_test_log.txt
            
-      - if: github.event_name == 'pull_request'
+      - if: ${{ env.checkout_ref != '' }}
         run: |
            brew test-bot --only-formulae mkectl | tee brew_test_log.txt
            if grep -q "Warning: 1 failed step ignored!" brew_test_log.txt; then
@@ -64,7 +82,7 @@ jobs:
            fi
 
       - name: Run pr-pull for each changed version
-        if: github.event_name == 'pull_request' && steps.find_versions.outputs.versions != ''
+        if: ${{ env.checkout_ref != '' }} && steps.find_versions.outputs.versions != ''
         run: |
           versions=${{ steps.find_versions.outputs.versions }}
           for version in $versions; do
@@ -74,7 +92,7 @@ jobs:
 
       - name: Upload bottles as artifact
         uses: actions/upload-artifact@v4
-        if: github.event_name == 'pull_request'
+        if: ${{ env.checkout_ref != '' }}
         with:
           name: bottles_${{ matrix.os }}
           path: '*.bottle.*'
