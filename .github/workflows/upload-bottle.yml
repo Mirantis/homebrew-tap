@@ -63,7 +63,7 @@ jobs:
           echo "bottle_path=$(pwd)/$corrected_bottle_file" >> "$GITHUB_ENV"
           
           brew install --build-bottle mkectl@{{ env.version }}
-          brew bottle mkectl@{{env.version }}
+          brew bottle mkectl@{{ env.version }}
           
           versioned_bottle_file=$(ls -1 mkectl-{{ env.version }}*.tar.gz | head -n 1)
           cversioned_bottle_file=$(echo "versioned_bottle_file" | sed 's/--/-/')
