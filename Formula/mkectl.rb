@@ -23,7 +23,7 @@ class Mkectl < Formula
     rebuild 1
     sha256 cellar: :any_skip_relocation, arm64_sonoma: "f1494b507da8b9d7ce969765810bfd0d781a0fc5dd31ee8cdb5f7cfff6f945ec"
     sha256 cellar: :any_skip_relocation, ventura: "65d947f544ddaf681c978744072558adb6c6bdb78036c52bb8bd90bddbd924a9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "4bbe6f64d2bfd2143c1546deb771cbdc49efb2794195e169ea85783c4092a1ee"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "b7ad9f344a27416fdbe7e2906608c0a37e105808d4e62b59831597c46e5551f8"
   end
 
   depends_on "kubernetes-cli@1.31"
