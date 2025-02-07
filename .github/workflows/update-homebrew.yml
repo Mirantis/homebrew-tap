@@ -76,6 +76,7 @@ jobs:
           cp $FORMULA_PATH Formula/mkectl@${{ env.version }}.rb
           stripped_version=$(echo "${{ env.version }}" | tr -d '.')
           sed -i "s/class Mkectl/class MkectlAT${stripped_version}/g" Formula/mkectl@${{ env.version }}.rb
+          sed -i '/rebuild [0-9]\+/d' Formula/mkectl@${{ env.version }}.rb
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
