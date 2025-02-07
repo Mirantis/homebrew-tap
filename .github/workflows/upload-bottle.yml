@@ -57,11 +57,19 @@ jobs:
           brew bottle mkectl
 
           bottle_file=$(ls -1 mkectl--*.tar.gz | head -n 1)
-          corrected_bottle_file="${bottle_file/.2.tar.gz/.tar.gz}"
-          corrected_bottle_file=$(echo "$corrected_bottle_file" | sed 's/--/-/')
+          corrected_bottle_file=$(echo "bottle_file" | sed 's/--/-/')
 
           mv "$bottle_file" "$corrected_bottle_file"
           echo "bottle_path=$(pwd)/$corrected_bottle_file" >> "$GITHUB_ENV"
+          
+          brew install --build-bottle mkectl@{{ env.version }}
+          brew bottle mkectl@{{env.version }}
+          
+          versioned_bottle_file=$(ls -1 mkectl-{{ env.version }}*.tar.gz | head -n 1)
+          cversioned_bottle_file=$(echo "versioned_bottle_file" | sed 's/--/-/')
+          
+          mv "versioned_bottle_file" "cversioned_bottle_file"
+          echo "versioned_bottle_path=$(pwd)/$cversioned_bottle_file" >> "$GITHUB_ENV"
 
       - name: Create a GitHub Release (if not existing)
         run: |
@@ -98,6 +106,8 @@ jobs:
 
       - name: Update Homebrew Formula
         run: |
+          ## TODO: DRY this out
+          
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git config pull.ff only
@@ -105,14 +115,18 @@ jobs:
           git pull
 
           FORMULA_PATH="Formula/mkectl.rb"
+          VERSIONED_FORMULA_PATH="Formula/mkectl@{{ env.version }}.rb
           
           if command -v sha256sum > /dev/null; then
             checksum=$(sha256sum "${{ env.bottle_path }}" | awk '{print $1}')
+            versioned_checksum=$(sha256sum "${{ env.versioned_bottle_path }}" | awk '{print $1}')
           else
             checksum=$(shasum -a 256 "${{ env.bottle_path }}" | awk '{print $1}')
+            versioned_checksum=$(shasum -a 256 "${{ env.versioned_bottle_path }}" | awk '{print $1}')
           fi
 
           echo "checksum is $checksum"
+          echo "versioned checksum is $versioned_checksum"
           
           awk -v matrixos="${{ matrix.os }}" -v checksum="$checksum" '
               /bottle do/ {
@@ -139,15 +153,36 @@ jobs:
           cp $FORMULA_PATH Formula/mkectl@${{ env.version }}.rb
           stripped_version=$(echo "${{ env.version }}" | tr -d '.')
           if [ "${{ matrix.os }}" == "ubuntu-22.04" ]; then
-            sed -i "s/class Mkectl/class MkectlAT${stripped_version}/g" Formula/mkectl@${{ env.version }}.rb
+            sed -i "s/class Mkectl/class MkectlAT${stripped_version}/g" $VERSIONED_FORMULA_PATH
           else
-            sed -i '' "s/class Mkectl/class MkectlAT${stripped_version}/g" Formula/mkectl@${{ env.version }}.rb
+            sed -i '' "s/class Mkectl/class MkectlAT${stripped_version}/g" $VERSIONED_FORMULA_PATH
           fi
+          
+          awk -v matrixos="${{ matrix.os }}" -v checksum="$versioned_checksum" '
+              /bottle do/ {
+                in_bottle_block = 1
+                print
+                next
+              }
+
+              in_bottle_block && /sha256/ {
+                  if ($0 ~ /ventura/ && matrixos == "macos-13") {
+                    $0 = "    sha256 cellar: :any_skip_relocation, ventura: \"" checksum "\""
+                  } else if ($0 ~ /arm64_sonoma/ && matrixos == "macos-14") {
+                    $0 = "    sha256 cellar: :any_skip_relocation, arm64_sonoma: \"" checksum "\""
+                  } else if ($0 ~ /x86_64_linux/ && matrixos == "ubuntu-22.04") {
+                    $0 = "    sha256 cellar: :any_skip_relocation, x86_64_linux: \"" checksum "\""
+                  }
+              }
+
+              { print }
+          ' "$VERSIONED_FORMULA_PATH" > tmp && mv tmp "$VERSIONED_FORMULA_PATH"
 
           rm -f ${{ env.bottle_path }}
+          rm -f ${{ env.versioned_bottle_path }}
           
           git add $FORMULA_PATH
-          git add Formula/mkectl@${{ env.version }}.rb
+          git add $VERSIONED_FORMULA_PATH
           git commit -m "Update bottle for ${{ matrix.os }} to ${{ env.version }}"
           git push origin update-mkectl-${{ env.version }}
 
