@@ -61,6 +61,8 @@ jobs:
 
           mv "$bottle_file" "$corrected_bottle_file"
           echo "bottle_path=$(pwd)/$corrected_bottle_file" >> "$GITHUB_ENV"
+
+          brew unlink mkectl || true
           
           brew install --build-bottle mkectl@${{ env.version }}
           brew bottle mkectl@${{ env.version }}
