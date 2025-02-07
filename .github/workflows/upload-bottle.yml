@@ -71,7 +71,7 @@ jobs:
           versioned_bottle_file=$(ls -1 mkectl@${{ env.version }}*.tar.gz | head -n 1)
           cversioned_bottle_file=$(echo "$versioned_bottle_file" | sed 's/--/-/')
           
-          mv "versioned_bottle_file" "$cversioned_bottle_file"
+          mv "$versioned_bottle_file" "$cversioned_bottle_file"
           echo "versioned_bottle_path=$(pwd)/$cversioned_bottle_file" >> "$GITHUB_ENV"
 
       - name: Create a GitHub Release (if not existing)
