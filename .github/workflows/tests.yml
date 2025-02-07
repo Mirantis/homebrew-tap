@@ -83,6 +83,16 @@ jobs:
              exit 1
            fi
 
+      - name: Upload bottles as artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ env.checkout_ref != '' }}
+        with:
+          name: bottles_${{ matrix.os }}
+          path: '*.bottle.*'
+
+      - name: Cleanup mkectl bottles
+        run : rm -rf *.bottle*
+
       - name: Run pr-pull for each changed version
         if: ${{ env.checkout_ref != '' }} && steps.find_versions.outputs.versions != ''
         run: |
