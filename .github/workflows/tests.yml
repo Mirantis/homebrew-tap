@@ -108,5 +108,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: ${{ env.checkout_ref != '' }}
         with:
-          name: bottles_${{ matrix.os }}
+          name: bottles_${{ matrix.os }}_versioned
           path: '*.bottle.*'
