@@ -91,7 +91,9 @@ jobs:
           path: '*.bottle.*'
 
       - name: Cleanup mkectl bottles
-        run : rm -rf *.bottle*
+        run : |
+          rm -rf *.bottle*
+          brew unlink mkectl || true
 
       - name: Run pr-pull for each changed version
         if: ${{ env.checkout_ref != '' }} && steps.find_versions.outputs.versions != ''
