@@ -19,10 +19,11 @@ class Mkectl < Formula
   end
 
   bottle do
-    root_url "https://github.com/Mirantis/homebrew-tap/releases/download/mkectl-#{VERSION}"
-    sha256 cellar: :any_skip_relocation, arm64_sonoma: "ce9c09f872a79ec76cb46af5127918bbbc3b2e8f9e5087db3d1ef2864395fbb7"
-    sha256 cellar: :any_skip_relocation, ventura: "82f99165b166a47b9cf95b6bcb92df3d9dc7b72136ac4d6da555d0b9f8d20472"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "7f8b041ca8f88e03d0f1ca42602210f51c74035fdabf55238a88710aa313f70f"
+    root_url "https://github.com/Mirantis/homebrew-tap/releases/download/mkectl-4.0.0"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_sonoma: "2a28e5ef4e067684592704c0fb20a1f94480ce68e7ffcdb10f84754ed82e8577"
+    sha256 cellar: :any_skip_relocation, ventura:      "329643f1e46554b81ed2c62ec2708657502bd166db0353ca1bbe636706520fde"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "d6fa128f908b70f011ebbc4d52425da5452fb655b0105576b697d4ae41852c37"
   end
 
   depends_on "kubernetes-cli@1.31"
