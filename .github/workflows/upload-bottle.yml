@@ -96,28 +96,76 @@ jobs:
       
           echo "Release ${TAG} is now available."
 
-      - name: Upload the Bottle to GitHub Release
+      - name: Upload the Bottles to GitHub Release
         run: |
+          TAG="mkectl-${{ env.version }}"
+
+          # Get the release ID with retry logic
+          get_release_id() {
+            local retries=5
+            local count=0
+            local delay=5
+
+            while [ $count -lt $retries ]; do
+              RELEASE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG} | jq -r '.id')
+
+              if [ "$RELEASE_ID" != "null" ] && [ -n "$RELEASE_ID" ]; then
+                echo "$RELEASE_ID"
+                return 0
+              fi
+
+              echo "Release ID not found. Retrying in $delay seconds..."
+              sleep $delay
+              count=$((count + 1))
+              delay=$((delay * 2))  # Exponential backoff
+            done
+
+            echo "Failed to fetch release ID after $retries attempts."
+            return 1
+          }
+
+          RELEASE_ID=$(get_release_id) || exit 1
+
+          upload_bottle() {
+            local provided_bottle_path="$1"
+            local retries=5
+            local count=0
+            local delay=5
+
+            while [ $count -lt $retries ]; do
+              response=$(curl -s -w "%{http_code}" -o response.json -X POST \
+                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Content-Type: application/json" \
+                -F "file=@${provided_bottle_path}" \
+                "https://uploads.github.com/repos/${{ github.repository }}/releases/${RELEASE_ID}/assets?name=$(basename "${provided_bottle_path}")")
+
+              if [ "$response" -eq 201 ]; then
+                echo "Bottle uploaded successfully."
+                return 0
+              else
+                message=$(jq -r '.message' response.json)
+                if [ "$message" == "Not Found" ]; then
+                  echo "Upload failed with 'Not Found'. Retrying in $delay seconds..."
+                else
+                  echo "Upload failed with response: $message"
+                  return 1
+                fi
+              fi
+
+              sleep $delay
+              count=$((count + 1))
+              delay=$((delay * 2))  # Exponential backoff
+            done
+
+            echo "Failed to upload bottle after $retries attempts."
+            return 1
+          }
+
           echo "Uploading bottle: ${{ env.bottle_path }}"
-          TAG="mkectl-${{ env.version }}"
-
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -F "file=@${{ env.bottle_path }}" \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG} | jq -r '.id')/assets?name=$(basename ${{ env.bottle_path }})"
-
-      - name: Upload the Versioned Bottle to GitHub Release
-        run: |
+          upload_bottle "${{ env.bottle_path }}"
           echo "Uploading bottle: ${{ env.versioned_bottle_path }}"
-          TAG="mkectl-${{ env.version }}"
-
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -F "file=@${{ env.versioned_bottle_path }}" \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG} | jq -r '.id')/assets?name=$(basename ${{ env.versioned_bottle_path }})"
-
+          upload_bottle "${{ env.versioned_bottle_path }}"
 
       - name: Update Homebrew Formula
         run: |
