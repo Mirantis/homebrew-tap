@@ -1,4 +1,4 @@
-class Mkectl < Formula
+class MkectlAT411 < Formula
   desc "Tool for creating and managing MKE 4.x kubernetes clusters"
   homepage "https://mirantis.github.io/mke-docs/"
   VERSION = "4.1.1".freeze
