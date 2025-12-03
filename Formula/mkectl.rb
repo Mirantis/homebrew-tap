@@ -7,13 +7,13 @@ class Mkectl < Formula
 
   if OS.mac? && Hardware::CPU.intel?
     url "https://github.com/MirantisContainers/mke-release/releases/download/v#{VERSION}/mkectl_darwin_x86_64.tar.gz"
-    sha256 "8e5cb7f0cbf9ddbdec2362416c526d2e7d823816ad3a663128ece2be392dda82"
+    sha256 "47ced52a44361024cdb3764d946b3e18c3e18487a76ddc03f97032392979cef6"
   elsif OS.mac? && Hardware::CPU.arm?
     url "https://github.com/MirantisContainers/mke-release/releases/download/v#{VERSION}/mkectl_darwin_arm64.tar.gz"
-    sha256 "c9920298046a44a2faae82e9627a46da12a1b0b606c59e66340f9a8a3aa01d91"
+    sha256 "a9c6533f37720b03c63ec8202684d93362ad1c878df5e17aa54aba3de55552eb"
   elsif OS.linux? && Hardware::CPU.intel?
     url "https://github.com/MirantisContainers/mke-release/releases/download/v#{VERSION}/mkectl_linux_x86_64.tar.gz"
-    sha256 "123d28fe19333948605ca76281d05ceeb1a30bae2755730085d4faf70b396a67"
+    sha256 "ba197889a044d8f8c23426b8b6b22df508ac064c35509f7fb9e49d90a784afe5"
   else
     odie "Unsupported platform"
   end
