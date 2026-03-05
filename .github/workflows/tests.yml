@@ -18,18 +18,21 @@ jobs:
   test-bot:
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-13, macos-14]
+        os: [ubuntu-22.04, macos-14]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Determine Checkout Ref
         if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
+        env:
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          DISPATCH_REF: ${{ github.event.inputs.checkout_ref }}
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then          
-            echo "checkout ref is ${{ github.event.pull_request.head.ref }} from pull_request"
-            echo "checkout_ref=${{ github.event.pull_request.head.ref }}" >> "$GITHUB_ENV"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "checkout ref is $PR_HEAD_REF from pull_request"
+            echo "checkout_ref=$PR_HEAD_REF" >> "$GITHUB_ENV"
           else
-            echo "checkout ref is ${{ github.event.inputs.checkout_ref }} from dispatch"
-            echo "checkout_ref=${{ github.event.inputs.checkout_ref }}" >> "$GITHUB_ENV"
+            echo "checkout ref is $DISPATCH_REF from dispatch"
+            echo "checkout_ref=$DISPATCH_REF" >> "$GITHUB_ENV"
           fi
 
       - name: Checkout Repository
@@ -91,17 +94,18 @@ jobs:
           path: '*.bottle.*'
 
       - name: Cleanup mkectl bottles
-        run : |
-          rm -rf *.bottle*
+        run: |
+          rm -rf -- *.bottle*
           brew unlink mkectl || true
 
       - name: Run pr-pull for each changed version
-        if: ${{ env.checkout_ref != '' }} && steps.find_versions.outputs.versions != ''
+        if: ${{ env.checkout_ref != '' && steps.find_versions.outputs.versions != '' }}
         run: |
-          versions=${{ steps.find_versions.outputs.versions }}
-          for version in $versions; do
+          versions="${{ steps.find_versions.outputs.versions }}"
+          IFS=' ' read -ra ver_array <<< "$versions"
+          for version in "${ver_array[@]}"; do
             echo "Running test-bot for mkectl@$version"
-            brew test-bot --only-formulae mkectl@$version | tee brew_test_log.txt
+            brew test-bot --only-formulae "mkectl@$version" | tee brew_test_log.txt
           done
 
       - name: Upload bottles as artifact
