@@ -1,4 +1,4 @@
-class Mkectl < Formula
+class MkectlAT414 < Formula
   desc "Tool for creating and managing MKE 4.x kubernetes clusters"
   homepage "https://docs.mirantis.com/mke4k/latest/"
   VERSION = "4.1.4".freeze
@@ -20,7 +20,6 @@ class Mkectl < Formula
 
   bottle do
     root_url "https://github.com/Mirantis/homebrew-tap/releases/download/mkectl-4.1.3"
-    rebuild 1
     sha256 cellar: :any_skip_relocation, arm64_sonoma: "097da275470c18fa913e5c8e22297bb9d92b26990143342efd49872850743767"
     sha256 cellar: :any_skip_relocation, sequoia:      "da9bd0c5eafb7df3e61a8f95bfb375faf0b16a0cdf3caaae66723299d067b056"
     sha256 cellar: :any_skip_relocation, x86_64_linux: "e6c9d3d75d6f8e0b344eb36f1cc17be7cdee967626b56c59bfa531f37bb7d09d"
