@@ -1,6 +1,6 @@
 class MkectlAT415 < Formula
   desc "Tool for creating and managing MKE 4.x kubernetes clusters"
-  homepage "https://docs.mirantis.com/mke4k/latest/"
+  homepage "https://docs.mirantis.com/mke4k/4.1.5/"
   VERSION = "4.1.5".freeze
 
   version VERSION
