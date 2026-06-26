@@ -50,8 +50,7 @@ jobs:
         id: find_versions
         if: ${{ env.checkout_ref != '' }}
         run: |
-          versions=$(git diff --name-only origin/main ${{ github.sha }} | grep -oE 'Formula/mkectl@[0-9.]+' | sed 's/Formula\/mkectl@//' | sed 's/\.$//' | tr '\n' ' ' | xargs)
-          echo "Versions changed: $versions"
+          versions=$(git diff --name-only origin/main ${{ github.sha }} | grep -oE 'Formula/mkectl@[^/]+\.rb$' | sed -E 's#Formula/mkectl@(.+)\.rb$#\1#' | tr '\n' ' ' | xargs)          echo "Versions changed: $versions"
           echo "versions=$versions" >> "$GITHUB_OUTPUT"
 
       - name: Cache Homebrew Bundler RubyGems
