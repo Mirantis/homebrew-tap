@@ -1,0 +1,39 @@
+name: PoC - pull_request_target write access
+
+on:
+  pull_request_target:
+    types: [labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  poc:
+    if: contains(github.event.pull_request.labels.*.name, 'pr-pull')
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Show security context
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "PR number: ${{ github.event.pull_request.number }}"
+          echo "PR author: ${{ github.event.pull_request.user.login }}"
+          echo "Event: ${{ github.event_name }}"
+
+          echo "Authenticated GitHub identity:"
+          gh api user --jq '.login'
+
+      - name: Prove repository write access
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api \
+            --method POST \
+            "repos/$GITHUB_REPOSITORY/issues" \
+            -f title="PoC: pull_request_target write-token verification" \
+            -f body="This issue was created by the pull_request_target PoC workflow.
+
