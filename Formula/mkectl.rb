@@ -1,19 +1,19 @@
 class Mkectl < Formula
   desc "Tool for creating and managing MKE 4.x kubernetes clusters"
   homepage "https://docs.mirantis.com/mke4k/latest/"
-  VERSION = "4.2.0".freeze
+  VERSION = "4.2.1".freeze
 
   version VERSION
 
   if OS.mac? && Hardware::CPU.intel?
     url "https://github.com/MirantisContainers/mke-release/releases/download/v#{VERSION}/mkectl_darwin_x86_64.tar.gz"
-    sha256 "e36b668e56875ea4b2288c37979fdb26488480d67c003a25d70e4463f9bd3bbe"
+    sha256 "a423f1a66c579cc7369460448fe5abd90c2cbcee38e64558d391ebc96a97d758"
   elsif OS.mac? && Hardware::CPU.arm?
     url "https://github.com/MirantisContainers/mke-release/releases/download/v#{VERSION}/mkectl_darwin_arm64.tar.gz"
-    sha256 "95e3fcaa65673912e316e3022d9e442631aaba8bca3373c99c28b089d65c597a"
+    sha256 "da845b4cc75d84e375ca91af676011b8c81d5ab572c4e39be34b35d1efe2c99c"
   elsif OS.linux? && Hardware::CPU.intel?
     url "https://github.com/MirantisContainers/mke-release/releases/download/v#{VERSION}/mkectl_linux_x86_64.tar.gz"
-    sha256 "ab8cfb2d321e6505c042cb42fd27a7f44a8a34d882384b9f82220b0eb9af1993"
+    sha256 "db95382a799ab0ee6e02517425f4c1b21f42fa0cc1681d124c0d010f48698d8c"
   else
     odie "Unsupported platform"
   end
