@@ -3,8 +3,6 @@ class MkectlAT420 < Formula
   homepage "https://docs.mirantis.com/mke4k/latest/"
   VERSION = "4.2.0".freeze
 
-  version VERSION
-
   if OS.mac? && Hardware::CPU.intel?
     url "https://github.com/MirantisContainers/mke-release/releases/download/v#{VERSION}/mkectl_darwin_x86_64.tar.gz"
     sha256 "e36b668e56875ea4b2288c37979fdb26488480d67c003a25d70e4463f9bd3bbe"
