@@ -1,6 +1,6 @@
 class Mkectl < Formula
   desc "Tool for creating and managing MKE 4.x kubernetes clusters"
-  homepage "https://docs.mirantis.com/mke4k/latest/"
+  homepage "https://docs.mirantis.com/mke4/latest/"
   VERSION = "4.2.1".freeze
 
   if OS.mac? && Hardware::CPU.intel?

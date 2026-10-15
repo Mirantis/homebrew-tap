@@ -78,6 +78,7 @@ jobs:
           stripped_version=$(echo "${{ env.version }}" | tr -d '.')
           sed -i "s/class Mkectl/class MkectlAT${stripped_version}/g" Formula/mkectl@${{ env.version }}.rb
           sed -i "/rebuild [0-9]\+/d" "Formula/mkectl@${{ env.version }}.rb"
+          sed -i "s#docs.mirantis.com/mke4/latest/#docs.mirantis.com/mke4/${{ env.version }}/#" "Formula/mkectl@${{ env.version }}.rb"
 
       - name: Create Pull Request
         id: create-pr
