@@ -16,12 +16,6 @@ class Mkectl < Formula
     odie "Unsupported platform"
   end
 
-  bottle do
-    root_url "https://github.com/Mirantis/homebrew-tap/releases/download/mkectl-4.2.1"
-    sha256 cellar: :any_skip_relocation, arm64_sonoma: "f36465be2031409a5c8d495cb7b6db7bd303166e6c7d1f1e55d10e718ed3611c"
-    sha256 cellar: :any_skip_relocation, sequoia:      "b3843d1a60280d1163d4ba266a09afd51d7f3914820f8ce2fc5498d6d058df29"
-  end
-
   def install
     bin.install "mkectl"
   end
